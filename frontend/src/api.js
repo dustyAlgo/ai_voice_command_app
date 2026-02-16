@@ -1,6 +1,18 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
+function normalizeApiBaseUrl(rawUrl) {
+  const fallback = "http://127.0.0.1:8000/api";
+  const candidate = (rawUrl || fallback).trim().replace(/\/+$/, "");
+  if (!candidate) {
+    return fallback;
+  }
+  if (candidate.endsWith("/api")) {
+    return candidate;
+  }
+  return `${candidate}/api`;
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,

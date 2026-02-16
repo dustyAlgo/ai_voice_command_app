@@ -116,3 +116,41 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "True").lower() == "true"
 
+
+def _parse_cors_origins(raw_value: str | None):
+    if not raw_value:
+        return []
+
+    value = raw_value.strip()
+    if not value:
+        return []
+
+    # Accept either JSON array or comma-separated string.
+    if value.startswith("["):
+        try:
+            parsed = json.loads(value)
+            if isinstance(parsed, list):
+                return [str(origin).strip().strip('"').strip("'").rstrip("/") for origin in parsed if str(origin).strip()]
+        except json.JSONDecodeError:
+            pass
+
+    # Handle loose bracketed strings like:
+    # [https://a.vercel.app,https://b.vercel.app/]
+    value = value.strip().lstrip("[").rstrip("]")
+
+    cleaned_origins = []
+    for segment in value.split(","):
+        origin = segment.strip().strip('"').strip("'").strip().lstrip("[").rstrip("]").rstrip("/")
+        if not origin:
+            continue
+        cleaned_origins.append(origin)
+    return cleaned_origins
+
+
+CORS_ALLOWED_ORIGINS = _parse_cors_origins(
+    os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173",
+    )
+)
+
