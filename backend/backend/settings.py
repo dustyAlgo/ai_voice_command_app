@@ -116,3 +116,30 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "True").lower() == "true"
 
+
+def _parse_cors_origins(raw_value: str | None):
+    if not raw_value:
+        return []
+
+    value = raw_value.strip()
+    if not value:
+        return []
+
+    # Support JSON array format or simple comma-separated values.
+    if value.startswith("["):
+        try:
+            parsed = json.loads(value)
+            if isinstance(parsed, list):
+                return [str(origin).strip().strip('"').strip("'").rstrip("/") for origin in parsed if str(origin).strip()]
+        except json.JSONDecodeError:
+            pass
+
+    return [segment.strip().strip('"').strip("'").rstrip("/") for segment in value.split(",") if segment.strip()]
+
+
+CORS_ALLOWED_ORIGINS = _parse_cors_origins(
+    os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173",
+    )
+)
