@@ -1,0 +1,50 @@
+[
+  {
+    "model": "catalog.product",
+    "pk": 1,
+    "fields": {
+      "name": "Almond Milk",
+      "category": "Dairy Alternatives",
+      "brand": "Alpro",
+      "price": "3.50",
+      "is_seasonal": false,
+      "season_tags": []
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 2,
+    "fields": {
+      "name": "Whole Wheat Bread",
+      "category": "Bakery",
+      "brand": "Harvest",
+      "price": "2.20",
+      "is_seasonal": false,
+      "season_tags": []
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 3,
+    "fields": {
+      "name": "Orange Juice",
+      "category": "Beverages",
+      "brand": "Tropicana",
+      "price": "4.00",
+      "is_seasonal": false,
+      "season_tags": []
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 4,
+    "fields": {
+      "name": "Mango",
+      "category": "Fruits",
+      "brand": null,
+      "price": "1.50",
+      "is_seasonal": true,
+      "season_tags": ["summer"]
+    }
+  }
+]
