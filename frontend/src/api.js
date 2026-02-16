@@ -30,4 +30,16 @@ export async function sendVoiceCommand(transcript) {
   return api.post("/voice/command/", { transcript });
 }
 
+export async function searchCatalog(payload) {
+  return api.post("/shopping/search/", payload);
+}
+
+export async function updateShoppingItemQuantity(itemId, delta) {
+  return api.post(`/shopping/item/${itemId}/quantity/`, { delta });
+}
+
+export async function removeShoppingItem(itemId) {
+  return api.post(`/shopping/item/${itemId}/remove/`, {});
+}
+
 export default api;

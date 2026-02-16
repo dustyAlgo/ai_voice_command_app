@@ -5,11 +5,12 @@
 - `ai/` contains Gemini client, prompt builder, and response validator.
 - `shopping/` persists list items and interaction history.
 - `catalog/` is the deterministic source for products and season tags.
+- Voice search supports `name`, `brand`, `size`, and price range filters.
 
 ## Voice Flow
 1. Frontend sends transcript to `/api/voice/command/` with JWT.
 2. Backend gathers context (active list, recent history, season, catalog snapshot).
-3. Gemini (`gemini-1.5-flash`) returns JSON.
+3. Gemini (configurable via `GEMINI_MODEL`, default `gemini-2.5-flash`) returns JSON.
 4. Backend validates output and executes add/remove/modify/search.
 5. API returns updated list, suggestions, substitutes, and search results.
 

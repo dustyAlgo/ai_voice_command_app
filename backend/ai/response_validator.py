@@ -26,6 +26,15 @@ def _positive_int(value: Any, default: int = 1) -> int:
         return default
 
 
+def _to_float_or_none(value: Any):
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def parse_and_validate_response(text: str) -> dict:
     body = _extract_json_block(text)
     try:
@@ -74,8 +83,9 @@ def parse_and_validate_response(text: str) -> dict:
     data["search"] = {
         "name": search.get("name") or None,
         "brand": search.get("brand") or None,
-        "min_price": search.get("min_price"),
-        "max_price": search.get("max_price"),
+        "size": search.get("size") or None,
+        "min_price": _to_float_or_none(search.get("min_price")),
+        "max_price": _to_float_or_none(search.get("max_price")),
     }
 
     if data.get("language") not in {"en", "hi"}:
