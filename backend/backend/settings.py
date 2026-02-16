@@ -2,6 +2,7 @@ import os
 import json
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
@@ -19,9 +20,63 @@ except ImportError:  # pragma: no cover
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def _parse_allowed_hosts(raw_value: str | None):
+    if not raw_value:
+        return ["*"]
+
+    value = raw_value.strip()
+    if not value:
+        return ["*"]
+
+    # Accept JSON array or comma-separated string.
+    if value.startswith("["):
+        try:
+            parsed = json.loads(value)
+            if isinstance(parsed, list):
+                tokens = [str(item).strip() for item in parsed if str(item).strip()]
+            else:
+                tokens = [value]
+        except json.JSONDecodeError:
+            tokens = [segment.strip() for segment in value.strip("[]").split(",") if segment.strip()]
+    else:
+        tokens = [segment.strip() for segment in value.split(",") if segment.strip()]
+
+    hosts = []
+    for token in tokens:
+        cleaned = token.strip().strip('"').strip("'").strip()
+        if not cleaned:
+            continue
+        if cleaned == "*":
+            return ["*"]
+
+        # If scheme is present, extract hostname.
+        if "://" in cleaned:
+            parsed = urlparse(cleaned)
+            cleaned = parsed.hostname or ""
+
+        # Strip any path/port residues if entered manually.
+        cleaned = cleaned.split("/")[0].split(":")[0].strip()
+        if cleaned:
+            hosts.append(cleaned)
+
+    return hosts or ["*"]
+
+
+def _with_render_hostname(hosts: list[str]):
+    render_hostname = (os.getenv("RENDER_EXTERNAL_HOSTNAME") or "").strip()
+    if not render_hostname:
+        return hosts
+
+    normalized = [host for host in hosts if host]
+    if render_hostname not in normalized:
+        normalized.append(render_hostname)
+    return normalized
+
+
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-ALLOWED_HOSTS = [host.strip() for host in os.getenv("ALLOWED_HOSTS", "*").split(",") if host.strip()]
+ALLOWED_HOSTS = _with_render_hostname(_parse_allowed_hosts(os.getenv("ALLOWED_HOSTS", "*")))
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL")
