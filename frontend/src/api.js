@@ -1,0 +1,33 @@
+import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+export function setAuthToken(token) {
+  if (!token) {
+    delete api.defaults.headers.common.Authorization;
+    return;
+  }
+  api.defaults.headers.common.Authorization = `Bearer ${token}`;
+}
+
+export async function register(email, password) {
+  return api.post("/auth/register/", { email, password });
+}
+
+export async function login(email, password) {
+  return api.post("/auth/login/", { email, password });
+}
+
+export async function fetchShoppingList() {
+  return api.get("/shopping/list/");
+}
+
+export async function sendVoiceCommand(transcript) {
+  return api.post("/voice/command/", { transcript });
+}
+
+export default api;
