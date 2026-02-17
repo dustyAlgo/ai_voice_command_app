@@ -174,3 +174,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOWED_ORIGINS = [origin for origin in CORS_ALLOWED_ORIGINS if origin]
 
+# Allow overriding to enable all origins via environment variable
+# If set to true, django-cors-headers will allow all origins.
+CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "False").lower() == "true"
+
