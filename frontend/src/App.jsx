@@ -134,7 +134,11 @@ function App() {
       const response = await login(email, password);
       setToken(response.data.access);
     } catch (err) {
-      setError(err?.response?.data?.detail || err?.response?.data?.error || "Authentication failed.");
+      if (err?.code === "ECONNABORTED") {
+        setError("Request timed out. Please try again.");
+      } else {
+        setError(err?.response?.data?.detail || err?.response?.data?.error || "Authentication failed.");
+      }
     } finally {
       setIsAuthSubmitting(false);
     }
