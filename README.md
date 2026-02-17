@@ -29,6 +29,6 @@ python manage.py runserver
 - If `DATABASE_URL` is set, backend switches to PostgreSQL automatically.
 
 ## Deployment
-- Frontend: Vercel
-- Backend: Render
+- Frontend: Vercel - https://ai-voice-command-app.vercel.app/
+- Backend: Render - https://ai-voice-command-app-1.onrender.com
 - DB: Render PostgreSQL
