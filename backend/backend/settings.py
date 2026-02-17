@@ -15,7 +15,63 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-ALLOWED_HOSTS = ["https://ai-voice-command-app-1.onrender.com"]
+
+
+def _parse_env_list(raw_value):
+    if not raw_value:
+        return []
+    value = raw_value.strip()
+    if not value:
+        return []
+    if value.startswith("["):
+        try:
+            parsed = json.loads(value)
+            if isinstance(parsed, list):
+                return [str(item).strip() for item in parsed if str(item).strip()]
+        except json.JSONDecodeError:
+            pass
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _normalize_allowed_host(host):
+    candidate = host.strip()
+    if not candidate:
+        return ""
+    if "://" in candidate:
+        parsed = urlparse(candidate)
+        candidate = parsed.netloc or parsed.path
+    candidate = candidate.split("/")[0]
+    if ":" in candidate and not candidate.startswith("["):
+        candidate = candidate.split(":", 1)[0]
+    return candidate
+
+
+def _normalize_origin(origin):
+    candidate = origin.strip().rstrip("/")
+    if not candidate:
+        return ""
+    if "://" not in candidate:
+        if candidate.startswith(("localhost", "127.0.0.1")):
+            candidate = f"http://{candidate}"
+        else:
+            candidate = f"https://{candidate}"
+    parsed = urlparse(candidate)
+    if not parsed.scheme or not parsed.netloc:
+        return ""
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
+default_allowed_hosts = [
+    "ai-voice-command-app-1.onrender.com",
+    "127.0.0.1",
+    "localhost",
+]
+allowed_hosts_from_env = _parse_env_list(os.getenv("ALLOWED_HOSTS", ""))
+ALLOWED_HOSTS = [
+    _normalize_allowed_host(host)
+    for host in (allowed_hosts_from_env or default_allowed_hosts)
+]
+ALLOWED_HOSTS = [host for host in ALLOWED_HOSTS if host]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL")
@@ -108,6 +164,13 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-CORS_ALLOWED_ORIGINS = ["https://ai-voice-command-app.vercel.app"]
-
+default_cors_allowed_origins = [
+    "https://ai-voice-command-app.vercel.app",
+]
+cors_origins_from_env = _parse_env_list(os.getenv("CORS_ALLOWED_ORIGINS", ""))
+CORS_ALLOWED_ORIGINS = [
+    _normalize_origin(origin)
+    for origin in (cors_origins_from_env or default_cors_allowed_origins)
+]
+CORS_ALLOWED_ORIGINS = [origin for origin in CORS_ALLOWED_ORIGINS if origin]
 
