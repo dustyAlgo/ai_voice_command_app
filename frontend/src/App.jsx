@@ -73,6 +73,7 @@ function App() {
   const [isCatalogSearching, setIsCatalogSearching] = useState(false);
   const [isCatalogVoiceListening, setIsCatalogVoiceListening] = useState(false);
   const [itemActionId, setItemActionId] = useState(null);
+  const [isAuthSubmitting, setIsAuthSubmitting] = useState(false);
   const [error, setError] = useState("");
   const commandSearchFilterChips = toFilterChips(voiceResponse?.applied_search_filters);
   const catalogSearchFilterChips = toFilterChips(catalogAppliedFilters);
@@ -120,9 +121,13 @@ function App() {
 
   async function handleAuth(event) {
     event.preventDefault();
+    if (isAuthSubmitting) {
+      return;
+    }
     setError("");
 
     try {
+      setIsAuthSubmitting(true);
       if (isRegisterMode) {
         await register(email, password);
       }
@@ -130,6 +135,8 @@ function App() {
       setToken(response.data.access);
     } catch (err) {
       setError(err?.response?.data?.detail || err?.response?.data?.error || "Authentication failed.");
+    } finally {
+      setIsAuthSubmitting(false);
     }
   }
 
@@ -304,12 +311,37 @@ function App() {
         <div className="card">
           <form onSubmit={handleAuth}>
             <div className="row">
-              <input className="full" placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <input className="full" placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <input
+                className="full"
+                placeholder="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isAuthSubmitting}
+              />
+              <input
+                className="full"
+                placeholder="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isAuthSubmitting}
+              />
             </div>
             <div className="row" style={{ marginTop: 10 }}>
-              <button type="submit">{isRegisterMode ? "Register + Login" : "Login"}</button>
-              <button type="button" onClick={() => setIsRegisterMode((prev) => !prev)}>
+              <button type="submit" disabled={isAuthSubmitting}>
+                {isAuthSubmitting ? (
+                  <span className="button-loading-content">
+                    <span className="button-spinner" />
+                    {isRegisterMode ? "Registering..." : "Logging in..."}
+                  </span>
+                ) : (
+                  (isRegisterMode ? "Register + Login" : "Login")
+                )}
+              </button>
+              <button type="button" onClick={() => setIsRegisterMode((prev) => !prev)} disabled={isAuthSubmitting}>
                 {isRegisterMode ? "Use Login" : "Create Account"}
               </button>
             </div>
