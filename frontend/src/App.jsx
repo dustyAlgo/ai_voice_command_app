@@ -11,6 +11,8 @@ import {
   updateShoppingItemQuantity,
 } from "./api";
 
+const AUTH_HARD_TIMEOUT_MS = 25000;
+
 function toFilterChips(appliedSearchFilters) {
   if (!appliedSearchFilters || typeof appliedSearchFilters !== "object") {
     return [];
@@ -125,9 +127,15 @@ function App() {
       return;
     }
     setError("");
+    let hardTimeoutId;
 
     try {
       setIsAuthSubmitting(true);
+      hardTimeoutId = window.setTimeout(() => {
+        setIsAuthSubmitting(false);
+        setError("Authentication is taking too long. Please try again.");
+      }, AUTH_HARD_TIMEOUT_MS);
+
       if (isRegisterMode) {
         await register(email, password);
       }
@@ -140,6 +148,9 @@ function App() {
         setError(err?.response?.data?.detail || err?.response?.data?.error || "Authentication failed.");
       }
     } finally {
+      if (hardTimeoutId) {
+        window.clearTimeout(hardTimeoutId);
+      }
       setIsAuthSubmitting(false);
     }
   }
