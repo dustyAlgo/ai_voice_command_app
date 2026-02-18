@@ -24,6 +24,7 @@ tokens.txt
 # Django secrets
 .myenv
 .env.*
+backend/.env
 
 # Django media & static
 media/

@@ -176,6 +176,15 @@ def _deterministic_substitute(original_name):
     }
 
 
+def _ai_fallback_hint(ai_error):
+    message = str(ai_error or "").lower()
+    if "gemini_api_key" in message or "api key was reported as leaked" in message:
+        return "Gemini API key is invalid or revoked. Update GEMINI_API_KEY."
+    if "unexpected model name format" in message or "invalid_argument" in message:
+        return "Gemini model configuration is invalid. Check GEMINI_MODEL and GEMINI_FALLBACK_MODELS."
+    return None
+
+
 def _execute_actions(user, payload):
     shopping_list = user.shopping_list
 
@@ -318,7 +327,11 @@ def process_voice_command(*, user, transcript):
 
     base_message = "; ".join(message_bits) if message_bits else "No list changes detected."
     if used_fallback_parser and ai_error:
-        base_message = f"AI unavailable. Executed command using fallback parser. {base_message}"
+        hint = _ai_fallback_hint(ai_error)
+        if hint:
+            base_message = f"AI unavailable ({hint}). Executed command using fallback parser. {base_message}"
+        else:
+            base_message = f"AI unavailable. Executed command using fallback parser. {base_message}"
 
     status_value = "success"
     if execution["unavailable_items"] or used_fallback_parser:

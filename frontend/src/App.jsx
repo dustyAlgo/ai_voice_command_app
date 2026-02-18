@@ -11,7 +11,7 @@ import {
   updateShoppingItemQuantity,
 } from "./api";
 
-const AUTH_HARD_TIMEOUT_MS = 25000;
+const AUTH_HARD_TIMEOUT_MS = 65000;
 
 function toFilterChips(appliedSearchFilters) {
   if (!appliedSearchFilters || typeof appliedSearchFilters !== "object") {
