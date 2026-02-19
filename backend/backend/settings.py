@@ -17,10 +17,16 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").strip().lower() in ("1", "true", "yes")
 raw_host = os.getenv("CORS_ALLOWED_ORIGINS", "")
-ALLOWED_HOSTS = []
 raw = os.getenv("CORS_ALLOWED_ORIGINS", "")
 CORS_ALLOWED_ORIGINS = json.loads(raw) if raw.startswith("[") else []
+
+hosts_raw = os.getenv("ALLOWED_HOSTS", "")
+if hosts_raw:
+    ALLOWED_HOSTS = [h.strip() for h in hosts_raw.split(",") if h.strip()]
+else:
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL")
