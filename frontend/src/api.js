@@ -39,6 +39,10 @@ export async function fetchShoppingList() {
   return api.get("/shopping/list/");
 }
 
+export async function fetchCatalogItems() {
+  return api.get("/shopping/catalog/");
+}
+
 export async function sendVoiceCommand(transcript) {
   return api.post("/voice/command/", { transcript });
 }

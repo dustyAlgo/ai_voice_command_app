@@ -11,6 +11,8 @@ from voice.rule_parser import parse_search_filters_from_transcript
 from .models import ShoppingItem
 from .serializers import ShoppingItemSerializer
 
+CATALOG_DASHBOARD_LIMIT = 50
+
 
 def _normalize_quantity(raw_quantity):
     try:
@@ -207,6 +209,29 @@ def remove_item_by_id(request, item_id):
 
     item.delete()
     return Response({"message": "Item removed"}, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_catalog_items(request):
+    products = Product.objects.all().order_by("name")[:CATALOG_DASHBOARD_LIMIT]
+
+    return Response(
+        {
+            "status": "success",
+            "items": [
+                {
+                    "id": product.id,
+                    "name": product.name,
+                    "brand": product.brand,
+                    "size": product.size,
+                    "price": float(product.price),
+                    "category": product.category,
+                }
+                for product in products
+            ],
+        }
+    )
 
 
 @api_view(["POST"])

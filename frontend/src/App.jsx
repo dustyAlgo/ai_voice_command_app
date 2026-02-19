@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  fetchCatalogItems,
   fetchShoppingList,
   login,
   register,
@@ -68,8 +69,10 @@ function App() {
   const [catalogSearch, setCatalogSearch] = useState(EMPTY_CATALOG_SEARCH);
   const [catalogResults, setCatalogResults] = useState(null);
   const [catalogAppliedFilters, setCatalogAppliedFilters] = useState({});
+  const [catalogItems, setCatalogItems] = useState([]);
 
   const [isLoadingList, setIsLoadingList] = useState(false);
+  const [isLoadingCatalogItems, setIsLoadingCatalogItems] = useState(false);
   const [isSubmittingVoice, setIsSubmittingVoice] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isCatalogSearching, setIsCatalogSearching] = useState(false);
@@ -99,6 +102,7 @@ function App() {
     setAuthToken(token);
     localStorage.setItem("access_token", token);
     refreshList();
+    refreshCatalogItems();
   }, [token]);
 
   useEffect(() => {
@@ -118,6 +122,18 @@ function App() {
       setError(err?.response?.data?.detail || "Failed to fetch shopping list.");
     } finally {
       setIsLoadingList(false);
+    }
+  }
+
+  async function refreshCatalogItems() {
+    try {
+      setIsLoadingCatalogItems(true);
+      const response = await fetchCatalogItems();
+      setCatalogItems(response.data?.items || []);
+    } catch (err) {
+      setError(err?.response?.data?.detail || "Failed to fetch catalog items.");
+    } finally {
+      setIsLoadingCatalogItems(false);
     }
   }
 
@@ -165,6 +181,7 @@ function App() {
     setCatalogSearch(EMPTY_CATALOG_SEARCH);
     setCatalogResults(null);
     setCatalogAppliedFilters({});
+    setCatalogItems([]);
   }
 
   function startListening() {
@@ -523,6 +540,29 @@ function App() {
                     Remove
                   </button>
                 </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h3>Catalog Items</h3>
+        {isLoadingCatalogItems ? (
+          <p className="small">Loading catalog items...</p>
+        ) : catalogItems.length === 0 ? (
+          <p className="small">No catalog items available.</p>
+        ) : (
+          <div className="search-results-grid">
+            {catalogItems.map((item, idx) => (
+              <div className="search-result-card" key={item.id || `${item.name}-${idx}`}>
+                <p>
+                  <strong>{item.name}</strong>
+                </p>
+                <p className="small">Brand: {item.brand || "No brand"}</p>
+                <p className="small">Category: {item.category}</p>
+                <p className="small">Size: {item.size || "N/A"}</p>
+                <p className="small">Price: ${item.price}</p>
               </div>
             ))}
           </div>

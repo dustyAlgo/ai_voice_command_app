@@ -154,6 +154,23 @@ class VoiceEndpointTests(APITestCase):
         self.assertEqual(response.data["applied_search_filters"]["size"], "100g")
         self.assertEqual(response.data["applied_search_filters"]["max_price"], 5.0)
 
+    def test_catalog_items_endpoint_returns_first_50(self):
+        for idx in range(60):
+            Product.objects.create(
+                name=f"Extra Product {idx:02d}",
+                category="misc",
+                brand="Demo",
+                size="1pc",
+                price=1.0,
+                season_tags=[],
+            )
+
+        response = self.client.get("/api/shopping/catalog/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["status"], "success")
+        self.assertEqual(len(response.data["items"]), 50)
+
 
 class ShoppingCartMutationTests(APITestCase):
     def setUp(self):
